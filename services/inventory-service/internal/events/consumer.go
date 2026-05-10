@@ -18,7 +18,7 @@ type BaseEvent struct {
 	SagaID    string                 `json:"sagaId"`
 	EventType string                 `json:"eventType"`
 	Producer  string                 `json:"producer"`
-	Timestamp time.Time              `json:"timestamp"`
+	Timestamp json.RawMessage        `json:"timestamp"`
 	Payload   map[string]interface{} `json:"payload"`
 }
 
@@ -50,33 +50,38 @@ func NewConsumer(
 
 func (c *Consumer) Start() {
 	log.Println("starting event consumer...")
-
 	ctx := context.Background()
+
+	// Proactive: log Kafka connection info
+	log.Printf("Kafka consumer connecting to brokers: %v, topic: %s, group: %s", c.reader.Config().Brokers, c.reader.Config().Topic, c.reader.Config().GroupID)
 
 	for {
 		msg, err := c.reader.ReadMessage(ctx)
 		if err != nil {
-			log.Printf("error reading message: %v", err)
+			log.Printf("[KAFKA ERROR] error reading message: %v", err)
+			time.Sleep(2 * time.Second)
 			continue
 		}
+
+		log.Printf("[KAFKA] received raw message: %s", string(msg.Value))
 
 		var event BaseEvent
 		if err := json.Unmarshal(msg.Value, &event); err != nil {
-			log.Printf("error unmarshaling event: %v", err)
+			log.Printf("[KAFKA ERROR] error unmarshaling event: %v", err)
 			continue
 		}
 
-		log.Printf("received event: %s type: %s", event.EventID, event.EventType)
+		log.Printf("[KAFKA] received event: %s type: %s", event.EventID, event.EventType)
 
 		// check idempotency
 		if c.processedEventRepo.Exists(event.EventID) {
-			log.Printf("event already processed: %s", event.EventID)
+			log.Printf("[KAFKA] event already processed: %s", event.EventID)
 			continue
 		}
 
 		// handle event
 		if err := c.handleEvent(&event); err != nil {
-			log.Printf("error handling event: %v", err)
+			log.Printf("[KAFKA ERROR] error handling event: %v", err)
 			continue
 		}
 
@@ -86,10 +91,10 @@ func (c *Consumer) Start() {
 			EventType: event.EventType,
 		}
 		if err := c.processedEventRepo.Save(processedEvent); err != nil {
-			log.Printf("error saving processed event: %v", err)
+			log.Printf("[KAFKA ERROR] error saving processed event: %v", err)
 		}
 
-		log.Printf("processed event: %s", event.EventID)
+		log.Printf("[KAFKA] processed event: %s", event.EventID)
 	}
 }
 

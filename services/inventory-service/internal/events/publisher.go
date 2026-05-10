@@ -61,12 +61,13 @@ func (p *Publisher) publishEvents() {
 			continue
 		}
 
+		tsBytes, _ := json.Marshal(event.Timestamp)
 		baseEvent := BaseEvent{
 			EventID:   event.EventID,
 			SagaID:    event.SagaID,
 			EventType: event.EventType,
 			Producer:  event.Producer,
-			Timestamp: event.Timestamp,
+			Timestamp: json.RawMessage(tsBytes),
 			Payload:   payloadMap,
 		}
 
