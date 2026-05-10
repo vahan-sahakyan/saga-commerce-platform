@@ -41,7 +41,7 @@ public class OutboxPublisherService {
                     .sagaId(event.getSagaId())
                     .eventType(event.getEventType())
                     .producer(event.getProducer())
-                    .timestamp(event.getTimestamp())
+                    .timestamp(objectMapper.valueToTree(event.getTimestamp()))
                     .payload(objectMapper.readValue(event.getPayload(), Object.class))
                     .build();
                 
