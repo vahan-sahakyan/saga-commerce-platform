@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# quick access to various endpoints
+
+echo "🔗 Saga Commerce Platform - Quick Access"
+echo ""
+echo "Services:"
+echo "  Order Service:     kubectl port-forward svc/order-service -n services 8080:8080"
+echo ""
+echo "Observability:"
+echo "  ArgoCD:            kubectl port-forward svc/argocd-server -n argocd 8080:443"
+echo "  Grafana:           kubectl port-forward svc/prometheus-grafana -n observability 3000:80"
+echo "  Jaeger:            kubectl port-forward svc/jaeger-query -n observability 16686:16686"
+echo "  Prometheus:        kubectl port-forward svc/prometheus-kube-prometheus-prometheus -n observability 9090:9090"
+echo ""
+echo "Infrastructure:"
+echo "  PostgreSQL:        kubectl port-forward svc/postgresql -n infra 5432:5432"
+echo "  Redis:             kubectl port-forward svc/redis-master -n infra 6379:6379"
+echo "  Redpanda Console:  kubectl port-forward svc/redpanda-0 -n infra 8080:8080"
+echo ""
+echo "Credentials:"
+echo "  ArgoCD admin password:"
+echo "    kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
+echo ""
+echo "  Grafana: admin/admin"
+echo "  PostgreSQL: saga/saga-password"
+echo "  Redis: redis-password"

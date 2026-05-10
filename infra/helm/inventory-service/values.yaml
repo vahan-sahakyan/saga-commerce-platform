@@ -1,0 +1,55 @@
+replicaCount: 1
+
+image:
+  repository: localhost:5001/inventory-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+env:
+  - name: POSTGRES_HOST
+    value: "postgresql.infra.svc.cluster.local"
+  - name: POSTGRES_PORT
+    value: "5432"
+  - name: POSTGRES_DB
+    value: "inventory_db"
+  - name: POSTGRES_USER
+    value: "saga"
+  - name: POSTGRES_PASSWORD
+    value: "saga-password"
+  - name: REDIS_HOST
+    value: "redis-master.infra.svc.cluster.local"
+  - name: REDIS_PORT
+    value: "6379"
+  - name: REDIS_PASSWORD
+    value: "redis-password"
+  - name: KAFKA_BOOTSTRAP_SERVERS
+    value: "redpanda.infra.svc.cluster.local:9092"
+  - name: JAEGER_ENDPOINT
+    value: "http://jaeger-collector.observability.svc.cluster.local:14268/api/traces"
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 15
+  periodSeconds: 5
