@@ -29,7 +29,7 @@ info()    { echo -e "${YELLOW}→ $*${RESET}"; }
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 check_prereqs() {
-    if ! curl -sf "$ORDER_URL/health" >/dev/null 2>&1; then
+    if ! curl -sf "$ORDER_URL/actuator/health" >/dev/null 2>&1; then
         fail "order-service not reachable at $ORDER_URL"
         echo "  Run:  kubectl port-forward svc/order-service -n services 8081:8080 &"
         echo "  Or:   make pf-order"
@@ -222,7 +222,7 @@ main() {
     echo -e "${BOLD}${CYAN}"
     echo "╔══════════════════════════════════════════════╗"
     echo "║   Saga Commerce Platform — Live Demo         ║"
-    echo "╚══════════════════════════════════════════════╝${RESET}"
+    echo -e "╚══════════════════════════════════════════════╝${RESET}"
 
     check_prereqs
     ensure_seed_data
