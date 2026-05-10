@@ -91,30 +91,61 @@ make bootstrap
 make deploy
 
 # 5. Seed test data
-./scripts/seed-data.sh
+make seed
 
-# 6. Test the saga
-./scripts/test-saga.sh
+# 6. Start port-forwards (observability + order API)
+make pf-all
+```
+
+## 🎬 Demo
+
+The demo script runs three isolated scenarios — each creates a fresh order with a unique customer ID so reruns are always consistent regardless of prior data.
+
+**Prerequisites:** `make pf-order` (or `make pf-all`) must be running so the order API is reachable on `localhost:8081`.
+
+### Run all scenarios at once
+```bash
+make demo
+```
+
+### Run individual scenarios
+```bash
+make demo-happy     # Happy path: inventory reserved + payment succeeds → PAYMENT_COMPLETED
+make demo-inv-fail  # Inventory failure: unknown product → saga compensates → FAILED
+make demo-pay-fail  # Payment declined: reserved stock released → saga compensates → FAILED
+```
+
+Or call the script directly:
+```bash
+./scripts/demo.sh [happy|inv-fail|pay-fail|all]
+```
+
+### How payment failure is simulated
+`PAYMENT_SUCCESS_RATE` is an env var on the payment-service pod (default `0.8` — set in [`infra/helm/payment-service/values.yaml`](infra/helm/payment-service/values.yaml)). The demo script temporarily overrides it to `1.0` (happy path) or `0.0` (always fail) via `kubectl set env`, then restores the default when done. You can also set it manually:
+
+```bash
+# Force all payments to fail
+kubectl set env deployment/payment-service -n services PAYMENT_SUCCESS_RATE=0.0
+
+# Restore default
+kubectl set env deployment/payment-service -n services PAYMENT_SUCCESS_RATE=0.8
 ```
 
 ## 📊 Access the Platform
 
-**Services:**
 ```bash
-kubectl port-forward svc/order-service -n services 8080:8080
+make pf-all        # start all port-forwards in background (observability + order API)
+make pf-obs        # observability only (Grafana, Prometheus, Jaeger, Redpanda Console)
+make pf-order      # order-service API only → localhost:8081
 ```
 
-**Observability:**
-```bash
-# ArgoCD
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-
-# Grafana
-kubectl port-forward svc/prometheus-grafana -n observability 3000:80
-
-# Jaeger
-kubectl port-forward svc/jaeger-query -n observability 16686:16686
-```
+| Tool | URL | Individual command |
+|---|---|---|
+| Order API | http://localhost:8081 | `make pf-order` |
+| Grafana | http://localhost:3000 | `make pf-grafana` |
+| Prometheus | http://localhost:9090 | `make pf-prometheus` |
+| Jaeger | http://localhost:16686 | `make pf-jaeger` |
+| Redpanda Console | http://localhost:8083 | `make pf-redpanda` |
 
 ## 🔄 Event Flow
 
