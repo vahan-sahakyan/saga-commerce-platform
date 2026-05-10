@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/saga-commerce-platform
+    repoURL: https://github.com/vahan-sahakyan/saga-commerce-platform
     targetRevision: HEAD
     path: infra/helm/order-service
   destination:

@@ -61,10 +61,15 @@ This interactive script will guide you through the complete setup process.
 
 See [QUICKSTART.md](QUICKSTART.md) for detailed commands.
 
+
 **Prerequisites:**
 - Docker Desktop (running)
 - k3d, kubectl, helm, terraform, jq
 - Build tools: Java 17, Go 1.21, Python 3.11, Node.js
+- **ArgoCD CLI** (for managing GitOps):
+  ```bash
+  brew install argocd
+  ```
 
 **Quick install (macOS):**
 ```bash

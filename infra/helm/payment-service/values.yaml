@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: localhost:5001/payment-service
+  repository: saga-registry:5000/payment-service
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -36,7 +36,7 @@ env:
   - name: REDIS_PASSWORD
     value: "redis-password"
   - name: KAFKA_BOOTSTRAP_SERVERS
-    value: "redpanda.infra.svc.cluster.local:9092"
+    value: "redpanda.infra.svc.cluster.local:9093"
   - name: JAEGER_ENDPOINT
     value: "http://jaeger-collector.observability.svc.cluster.local:14268/api/traces"
 

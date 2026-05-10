@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: localhost:5001/order-service
+  repository: saga-registry:5000/order-service
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -32,7 +32,7 @@ env:
   - name: POSTGRES_PASSWORD
     value: "saga-password"
   - name: KAFKA_BOOTSTRAP_SERVERS
-    value: "redpanda.infra.svc.cluster.local:9092"
+    value: "redpanda.infra.svc.cluster.local:9093"
   - name: JAEGER_ENDPOINT
     value: "http://jaeger-collector.observability.svc.cluster.local:14268/api/traces"
 

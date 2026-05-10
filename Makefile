@@ -25,9 +25,16 @@ install-infra: ## install infrastructure components using terraform
 	@echo "⏳ Waiting for ArgoCD to be ready..."
 	kubectl wait --for=condition=Ready pods --all -n argocd --timeout=300s
 
-deploy: ## deploy all services via ArgoCD
+deploy: docker-push-all ## build and push all images, then deploy all services via ArgoCD
 	@echo "🚢 Deploying services..."
 	kubectl apply -f infra/argocd/applications/
+
+docker-push-all: ## Push all service images to local registry for k3d (host: localhost:5001, cluster: saga-registry:5000)
+	@echo "🐳 Pushing all service images to localhost:5001 (mapped to saga-registry:5000 inside cluster)..."
+	docker push localhost:5001/order-service:latest
+	docker push localhost:5001/inventory-service:latest
+	docker push localhost:5001/payment-service:latest
+	docker push localhost:5001/notification-service:latest
 
 status: ## check status of all components
 	@echo "📊 Cluster Status:"
