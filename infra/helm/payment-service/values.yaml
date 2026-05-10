@@ -39,6 +39,10 @@ env:
     value: "redpanda.infra.svc.cluster.local:9093"
   - name: JAEGER_ENDPOINT
     value: "http://jaeger-collector.observability.svc.cluster.local:14268/api/traces"
+  # Simulated payment success rate. 1.0 = always succeed, 0.0 = always fail.
+  # The demo script overrides this temporarily via kubectl set env.
+  - name: PAYMENT_SUCCESS_RATE
+    value: "0.8"
 
 livenessProbe:
   httpGet:

@@ -31,8 +31,8 @@ class PaymentService:
         self.db.add(payment)
         self.db.flush()  # get the payment ID
         
-        # simulate payment processing (80% success rate)
-        success = random.random() < 0.8
+        # simulate payment processing (rate controlled via PAYMENT_SUCCESS_RATE env var)
+        success = random.random() < settings.payment_success_rate
         
         if success:
             payment.status = "SUCCEEDED"

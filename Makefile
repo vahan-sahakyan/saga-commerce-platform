@@ -3,7 +3,8 @@
         dev-order dev-inventory dev-payment dev-notification dev-all \
         restart-order restart-inventory restart-payment restart-notification \
         logs-order logs-inventory logs-payment logs-notification \
-        pf-grafana pf-prometheus pf-jaeger pf-redpanda pf-order pf-obs pf-all
+        pf-grafana pf-prometheus pf-jaeger pf-redpanda pf-order pf-obs pf-all \
+        demo demo-happy demo-inv-fail demo-pay-fail seed
 
 CLUSTER_NAME  := saga-platform
 K3D_CONFIG    := infra/bootstrap/k3d-config.yaml
@@ -193,3 +194,29 @@ pf-obs: ## Port-forward all observability tools in background
 pf-all: pf-obs ## Port-forward observability tools + order-service
 	kubectl port-forward svc/order-service -n $(SERVICES_NS) 8081:8080 &
 	@echo "   Order API: http://localhost:8081"
+
+# ─── Seed data ────────────────────────────────────────────────────────────────
+
+seed: ## Seed inventory products into the database (idempotent)
+	@echo "🌱 Seeding inventory data..."
+	kubectl exec postgresql-0 -n infra -- env PGPASSWORD=saga-password psql -U saga -d inventory_db -c \
+		"INSERT INTO inventories (id, product_id, quantity, reserved, created_at, updated_at) VALUES \
+		(gen_random_uuid(), 'product-1', 100, 0, NOW(), NOW()), \
+		(gen_random_uuid(), 'product-2', 50,  0, NOW(), NOW()), \
+		(gen_random_uuid(), 'product-3', 75,  0, NOW(), NOW()) \
+		ON CONFLICT (product_id) DO NOTHING;"
+	@echo "✅ Seeded: product-1 (100 units), product-2 (50 units), product-3 (75 units)"
+
+# ─── Demo targets ─────────────────────────────────────────────────────────────
+
+demo: ## Run all demo scenarios (happy path + failure paths)
+	@./scripts/demo.sh all
+
+demo-happy: ## Demo: happy path (inventory reserved + payment succeeded)
+	@./scripts/demo.sh happy
+
+demo-inv-fail: ## Demo: inventory failure (unknown product → saga compensates)
+	@./scripts/demo.sh inv-fail
+
+demo-pay-fail: ## Demo: payment failure (payment declined → saga compensates)
+	@./scripts/demo.sh pay-fail

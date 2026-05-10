@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # observability
     jaeger_endpoint: str = os.getenv("JAEGER_ENDPOINT", "http://localhost:14268/api/traces")
     
+    # demo controls (1.0 = always succeed, 0.0 = always fail, 0.8 = default)
+    payment_success_rate: float = float(os.getenv("PAYMENT_SUCCESS_RATE", "0.8"))
+
     # service
     service_name: str = "payment-service"
     
