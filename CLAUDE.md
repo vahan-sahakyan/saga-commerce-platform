@@ -6,6 +6,7 @@ Goal:
 Build a fully local, production-style, polyglot microservice platform implementing Saga Choreography architecture.
 
 The system should:
+
 - run completely locally
 - be free of paid services
 - use Kubernetes + GitOps
@@ -19,20 +20,21 @@ The system should:
 # High-Level Architecture
 
 User/API
-    ↓
+↓
 Order Service (Java)
-    ↓ publishes event
+↓ publishes event
 Redpanda/Kafka
-    ↓
+↓
 Inventory Service (Go)
-    ↓ publishes event
+↓ publishes event
 Payment Service (Python)
-    ↓ publishes event
+↓ publishes event
 Shipping Service (Go or Java)
-    ↓ publishes event
+↓ publishes event
 Notification Service (TypeScript)
 
 Shared infrastructure:
+
 - Kubernetes (k3d)
 - ArgoCD
 - Helm
@@ -53,6 +55,7 @@ Shared infrastructure:
 Do NOT implement a central orchestrator service.
 
 Each service:
+
 - listens to events
 - performs business logic
 - emits new events
@@ -68,10 +71,12 @@ No direct synchronous service-to-service calls for business workflow.
 Every service owns its own database/schema.
 
 Allowed:
+
 - own DB reads/writes
 - event communication
 
 Forbidden:
+
 - cross-service DB access
 
 ---
@@ -79,9 +84,11 @@ Forbidden:
 ## 3. Event-driven architecture
 
 Use:
+
 - Redpanda (Kafka-compatible)
 
 Topics:
+
 - order-events
 - inventory-events
 - payment-events
@@ -95,6 +102,7 @@ Topics:
 Consumers must be idempotent.
 
 Requirements:
+
 - processed_events table
 - ignore duplicate events
 - eventId tracking
@@ -106,6 +114,7 @@ Requirements:
 Every service must implement transactional outbox pattern.
 
 Flow:
+
 1. business transaction commits
 2. outbox event stored
 3. background publisher publishes event
@@ -118,6 +127,7 @@ Never publish directly from business logic.
 ## 6. Correlation IDs
 
 Every event must contain:
+
 - eventId
 - sagaId
 - timestamp
@@ -145,13 +155,17 @@ Example:
 ## Services
 
 ### order-service
+
 Language:
+
 - Java
 
 Framework:
+
 - Spring Boot
 
 Responsibilities:
+
 - create orders
 - persist orders
 - emit OrderCreated
@@ -160,46 +174,59 @@ Responsibilities:
 ---
 
 ### inventory-service
+
 Language:
+
 - Go
 
 Responsibilities:
+
 - reserve inventory
 - release inventory on compensation
 - emit InventoryReserved
 - emit InventoryFailed
 
 Use Redis for:
+
 - stock cache
 - reservation locks
 
 ---
 
 ### payment-service
+
 Language:
+
 - Python
 
 Framework:
+
 - FastAPI
 
 Responsibilities:
+
 - simulate payments
 - emit PaymentSucceeded
 - emit PaymentFailed
 
 Use Redis for:
+
 - idempotency cache
 
 ---
 
 ### notification-service
+
 Language:
+
 - TypeScript
 
 Framework:
+
 - Node.js + Fastify
 
 Responsibilities:
+
 - consume saga completion/failure
 - simulate emails/logging
 
@@ -210,9 +237,11 @@ Responsibilities:
 ## Kubernetes
 
 Use:
+
 - k3d
 
 Cluster name:
+
 - saga-platform
 
 ---
@@ -220,9 +249,11 @@ Cluster name:
 ## GitOps
 
 Use:
+
 - ArgoCD
 
 Requirements:
+
 - apps managed through GitOps
 - no manual kubectl deployments except bootstrap
 
@@ -231,12 +262,14 @@ Requirements:
 ## Terraform
 
 Terraform responsibilities:
+
 - namespaces
 - ArgoCD install
 - Helm releases
 - infrastructure provisioning
 
 Providers:
+
 - kubernetes
 - helm
 
@@ -247,9 +280,11 @@ Do NOT provision cloud resources.
 ## Helm
 
 Every service must have:
+
 - its own Helm chart
 
 Charts should support:
+
 - image
 - replicas
 - resources
@@ -263,9 +298,11 @@ Charts should support:
 ## Metrics
 
 Use:
+
 - Prometheus
 
 Every service should expose:
+
 - request count
 - error count
 - event consumption count
@@ -276,9 +313,11 @@ Every service should expose:
 ## Dashboards
 
 Use:
+
 - Grafana
 
 Required dashboards:
+
 - service health
 - Kafka metrics
 - saga flow metrics
@@ -288,10 +327,12 @@ Required dashboards:
 ## Tracing
 
 Use:
+
 - OpenTelemetry
 - Jaeger
 
 Requirements:
+
 - propagate trace IDs through events
 - trace complete saga lifecycle
 
@@ -300,6 +341,7 @@ Requirements:
 # Logging
 
 Requirements:
+
 - structured JSON logs
 - include:
   - traceId
@@ -314,6 +356,7 @@ Requirements:
 ## Deployment
 
 Everything must run locally through:
+
 - Kubernetes
 - Docker
 
@@ -364,6 +407,7 @@ repo/
 ## Phase 1 — Local Platform
 
 Implement:
+
 - k3d cluster
 - ingress
 - ArgoCD
@@ -375,6 +419,7 @@ Implement:
 - Jaeger
 
 Success criteria:
+
 - all infra healthy in cluster
 
 ---
@@ -382,6 +427,7 @@ Success criteria:
 ## Phase 2 — Order Service
 
 Implement:
+
 - REST API
 - PostgreSQL persistence
 - outbox table
@@ -389,6 +435,7 @@ Implement:
 - OrderCreated event
 
 Success criteria:
+
 - order creation emits event
 
 ---
@@ -396,11 +443,13 @@ Success criteria:
 ## Phase 3 — Inventory Service
 
 Implement:
+
 - consume OrderCreated
 - reserve stock
 - emit InventoryReserved
 
 Success criteria:
+
 - inventory reacts automatically
 
 ---
@@ -408,11 +457,13 @@ Success criteria:
 ## Phase 4 — Payment Service
 
 Implement:
+
 - consume InventoryReserved
 - simulate payment
 - emit PaymentSucceeded or PaymentFailed
 
 Success criteria:
+
 - payment flow works
 
 ---
@@ -420,10 +471,12 @@ Success criteria:
 ## Phase 5 — Compensation
 
 Implement failure handling:
+
 - release inventory
 - cancel order
 
 Success criteria:
+
 - saga rollback works
 
 ---
@@ -431,11 +484,13 @@ Success criteria:
 ## Phase 6 — Observability
 
 Implement:
+
 - traces
 - metrics
 - dashboards
 
 Success criteria:
+
 - entire saga visible in Jaeger
 
 ---
@@ -443,6 +498,7 @@ Success criteria:
 # Engineering Standards
 
 Requirements:
+
 - health endpoints
 - readiness/liveness probes
 - graceful shutdown
@@ -456,6 +512,7 @@ Requirements:
 # Important Constraints
 
 Avoid initially:
+
 - service mesh
 - Istio
 - Vault
@@ -470,6 +527,7 @@ Keep the platform understandable.
 # Deliverable Goal
 
 The final platform should demonstrate:
+
 - microservices
 - event-driven architecture
 - saga choreography

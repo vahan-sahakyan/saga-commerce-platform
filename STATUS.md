@@ -5,12 +5,14 @@
 ### Phase 1: Infrastructure Setup (100% Complete)
 
 #### Cluster & GitOps
+
 - ✅ k3d cluster configuration
 - ✅ ArgoCD installation via Terraform
 - ✅ Local Docker registry support
 - ✅ Bootstrap scripts
 
 #### Terraform Infrastructure
+
 - ✅ Namespace management (argocd, infra, services, observability)
 - ✅ Redpanda/Kafka deployment
 - ✅ PostgreSQL deployment
@@ -20,12 +22,14 @@
 - ✅ Jaeger deployment
 
 #### Helm Charts
+
 - ✅ Order Service Helm chart
 - ✅ Inventory Service Helm chart
 - ✅ Payment Service Helm chart (template ready)
 - ✅ Notification Service Helm chart (template ready)
 
 #### ArgoCD Applications
+
 - ✅ Application manifests for all services
 - ✅ GitOps configuration
 
@@ -34,6 +38,7 @@
 **Technology**: Java 17 + Spring Boot 3.2.0
 
 **Implemented Features**:
+
 - ✅ REST API for order creation
 - ✅ PostgreSQL persistence (orders table)
 - ✅ Transactional outbox pattern
@@ -46,12 +51,14 @@
 - ✅ Dockerfile
 
 **Database Schema**:
+
 - `orders` - order data and status
 - `order_items` - order line items
 - `outbox_events` - transactional outbox
 - `processed_events` - idempotency tracking
 
 **Endpoints**:
+
 - `POST /api/orders` - Create order
 - `GET /api/orders/{id}` - Get order by ID
 - `GET /api/orders` - List all orders
@@ -62,6 +69,7 @@
 **Technology**: Go 1.21 + Gin
 
 **Implemented Features**:
+
 - ✅ Event-driven inventory reservation
 - ✅ PostgreSQL persistence
 - ✅ Redis for caching/locking
@@ -74,12 +82,14 @@
 - ✅ Dockerfile
 
 **Database Schema**:
+
 - `inventories` - product stock levels
 - `reservations` - active reservations
 - `outbox_events` - transactional outbox
 - `processed_events` - idempotency tracking
 
 **Endpoints**:
+
 - `POST /api/inventory/reserve` - Reserve inventory
 - `POST /api/inventory/release` - Release inventory
 - `GET /api/inventory/:productId` - Get inventory
@@ -94,6 +104,7 @@
 **Status**: ✅ Complete
 
 **Implemented**:
+
 - ✅ FastAPI application setup
 - ✅ PostgreSQL persistence (payments table)
 - ✅ Redis for idempotency cache
@@ -107,11 +118,13 @@
 - ✅ Dockerfile
 
 **Database Schema**:
+
 - `payments` - payment records
 - `outbox_events` - transactional outbox
 - `processed_events` - idempotency tracking
 
 **Events**:
+
 - Consumes: `InventoryReserved`
 - Produces: `PaymentSucceeded`, `PaymentFailed`
 
@@ -120,6 +133,7 @@
 **Status**: ✅ Complete
 
 **Implemented**:
+
 - ✅ Fastify application setup
 - ✅ Event consumer (OrderCompleted, OrderFailed, PaymentSucceeded, ShippingInitiated)
 - ✅ Notification simulation (console logging with emojis)
@@ -129,6 +143,7 @@
 - ✅ Dockerfile
 
 **Events**:
+
 - Consumes: `OrderCompleted`, `OrderFailed`, `ShippingInitiated`, `PaymentSucceeded`
 - Produces: None (terminal service)
 
@@ -137,6 +152,7 @@
 **Status**: ✅ Complete
 
 **Implemented**:
+
 - ✅ Inventory release on PaymentFailed event
 - ✅ Order status update to FAILED on any failure
 - ✅ Compensating transactions in transactional scope
@@ -146,6 +162,7 @@
 **Status**: Infrastructure ready, partial instrumentation
 
 **Completed**:
+
 - ✅ Prometheus deployed
 - ✅ Grafana deployed
 - ✅ Jaeger deployed
@@ -153,6 +170,7 @@
 - ✅ Health/readiness probes
 
 **Remaining Work**:
+
 - [ ] Complete OpenTelemetry integration in all services
 - [ ] Create custom Grafana dashboards
 - [ ] Configure Prometheus scraping for service metrics
@@ -173,7 +191,7 @@ All core services are complete and functional. The platform demonstrates:
 ✅ **Event-Driven** architecture with Kafka  
 ✅ **GitOps** with ArgoCD  
 ✅ **Infrastructure as Code** with Terraform  
-✅ **Full observability stack** deployed  
+✅ **Full observability stack** deployed
 
 ### What Can You Do Now?
 
@@ -191,6 +209,7 @@ All core services are complete and functional. The platform demonstrates:
 ### Prerequisites
 
 Install:
+
 - Docker Desktop
 - k3d: `brew install k3d`
 - kubectl: `brew install kubectl`
@@ -297,26 +316,31 @@ kubectl port-forward svc/prometheus-kube-prometheus-prometheus -n observability 
 ## 🏗️ Architecture Patterns Implemented
 
 ### 1. Saga Choreography
+
 - ✅ No central orchestrator
 - ✅ Event-driven communication
 - ✅ Autonomous services
 
 ### 2. Transactional Outbox
+
 - ✅ Business transaction + event storage in single DB transaction
 - ✅ Background publisher polls outbox
 - ✅ At-least-once delivery guarantee
 
 ### 3. Idempotency
+
 - ✅ `processed_events` table in each service
 - ✅ Duplicate event detection
 - ✅ Exactly-once processing semantics
 
 ### 4. Compensation
+
 - ✅ Inventory release on payment failure
 - ✅ Order status updates on failure
 - ✅ Compensating events
 
 ### 5. Database per Service
+
 - ✅ Each service owns its schema
 - ✅ No cross-service database access
 - ✅ Data isolation
@@ -391,26 +415,31 @@ saga-commerce-platform/
 ## 🔍 Debugging Tips
 
 ### Check Pod Status
+
 ```bash
 kubectl get pods -A
 ```
 
 ### View Logs
+
 ```bash
 kubectl logs -f <pod-name> -n services
 ```
 
 ### Check Kafka Topics
+
 ```bash
 kubectl exec -it redpanda-0 -n infra -- rpk topic list
 ```
 
 ### View Kafka Messages
+
 ```bash
 kubectl exec -it redpanda-0 -n infra -- rpk topic consume order-events
 ```
 
 ### Database Access
+
 ```bash
 kubectl port-forward svc/postgresql -n infra 5432:5432
 psql -h localhost -U saga -d order_db

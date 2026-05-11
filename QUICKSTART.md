@@ -9,8 +9,9 @@ Run the interactive setup script:
 ```
 
 This will guide you through:
+
 1. ✅ Checking dependencies
-2. ✅ Bootstrapping infrastructure  
+2. ✅ Bootstrapping infrastructure
 3. ✅ Building services
 4. ✅ Deploying to Kubernetes
 5. ✅ Seeding test data
@@ -23,17 +24,20 @@ This will guide you through:
 ### 1. Install Dependencies (macOS)
 
 **Quick install:**
+
 ```bash
 ./scripts/install-deps.sh
 ```
 
 **Or manually:**
+
 ```bash
 brew install k3d kubectl helm terraform jq
 brew install openjdk@17 go python@3.11 node maven
 ```
 
 **Verify installation:**
+
 ```bash
 ./scripts/preflight-check.sh
 ```
@@ -47,6 +51,7 @@ make bootstrap
 This creates the k3d cluster and deploys all infrastructure.
 
 **Check status:**
+
 ```bash
 make status
 # OR
@@ -60,6 +65,7 @@ kubectl get pods -A
 ```
 
 **Or build individually:**
+
 ```bash
 # Order Service (Java)
 cd services/order-service
@@ -90,6 +96,7 @@ make deploy
 ```
 
 Wait for services to be ready:
+
 ```bash
 kubectl wait --for=condition=Ready pods -n services --all --timeout=300s
 ```
@@ -103,11 +110,13 @@ kubectl wait --for=condition=Ready pods -n services --all --timeout=300s
 ### 6. Test the Platform
 
 **Port forward the order service:**
+
 ```bash
 kubectl port-forward svc/order-service -n services 8080:8080
 ```
 
 **In another terminal, create a test order:**
+
 ```bash
 ./scripts/test-saga.sh
 ```
@@ -119,6 +128,7 @@ kubectl port-forward svc/order-service -n services 8080:8080
 ### Services
 
 **Order Service API:**
+
 ```bash
 kubectl port-forward svc/order-service -n services 8080:8080
 curl http://localhost:8080/api/orders
@@ -127,6 +137,7 @@ curl http://localhost:8080/api/orders
 ### Observability
 
 **ArgoCD:**
+
 ```bash
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 # Get password:
@@ -135,18 +146,21 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.pas
 ```
 
 **Grafana:**
+
 ```bash
 kubectl port-forward svc/prometheus-grafana -n observability 3000:80
 # Access: http://localhost:3000 (admin / admin)
 ```
 
 **Jaeger:**
+
 ```bash
 kubectl port-forward svc/jaeger-query -n observability 16686:16686
 # Access: http://localhost:16686
 ```
 
 **Prometheus:**
+
 ```bash
 kubectl port-forward svc/prometheus-kube-prometheus-prometheus -n observability 9090:9090
 # Access: http://localhost:9090
@@ -224,6 +238,7 @@ SELECT id, customer_id, status, total_amount FROM orders ORDER BY created_at DES
 ## Troubleshooting
 
 ### Check Pod Status
+
 ```bash
 kubectl get pods -A
 kubectl describe pod <pod-name> -n <namespace>
@@ -231,17 +246,20 @@ kubectl logs <pod-name> -n <namespace>
 ```
 
 ### Restart Services
+
 ```bash
 kubectl rollout restart deployment -n services
 ```
 
 ### Clear Test Data
+
 ```bash
 # Clear orders
 kubectl exec -it postgresql-0 -n infra -- psql -U saga -d order_db -c "TRUNCATE TABLE orders CASCADE;"
 ```
 
 ### Destroy Everything
+
 ```bash
 make destroy
 ```
@@ -251,6 +269,7 @@ make destroy
 ## Next Steps
 
 📖 **Read the full guides:**
+
 - [GETTING_STARTED.md](GETTING_STARTED.md) - Comprehensive setup guide
 - [STATUS.md](STATUS.md) - Implementation details
 - [docs/architecture/saga-choreography.md](docs/architecture/saga-choreography.md) - Architecture patterns
@@ -260,16 +279,16 @@ make destroy
 
 ## Quick Reference
 
-| Command | Description |
-|---------|-------------|
-| `make bootstrap` | Create cluster + install infrastructure |
-| `make deploy` | Deploy all services |
-| `make status` | Check system status |
-| `make destroy` | Tear down everything |
-| `./scripts/build-all.sh` | Build all service images |
-| `./scripts/seed-data.sh` | Add test data |
-| `./scripts/test-saga.sh` | Run end-to-end test |
-| `./scripts/access-endpoints.sh` | Show all access commands |
+| Command                         | Description                             |
+| ------------------------------- | --------------------------------------- |
+| `make bootstrap`                | Create cluster + install infrastructure |
+| `make deploy`                   | Deploy all services                     |
+| `make status`                   | Check system status                     |
+| `make destroy`                  | Tear down everything                    |
+| `./scripts/build-all.sh`        | Build all service images                |
+| `./scripts/seed-data.sh`        | Add test data                           |
+| `./scripts/test-saga.sh`        | Run end-to-end test                     |
+| `./scripts/access-endpoints.sh` | Show all access commands                |
 
 ---
 

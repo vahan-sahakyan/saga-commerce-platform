@@ -29,12 +29,12 @@ This file provides essential guidance for AI coding agents working in the saga-c
 
 ## Services
 
-| Service               | Language      | Responsibilities                                   |
-|-----------------------|--------------|----------------------------------------------------|
-| order-service         | Java         | Order creation, saga flow, emits OrderCreated       |
-| inventory-service     | Go           | Inventory reservation, emits InventoryReserved      |
-| payment-service       | Python       | Payment simulation, emits PaymentSucceeded/Failed   |
-| notification-service  | TypeScript   | Notification/logging, consumes saga completion      |
+| Service              | Language   | Responsibilities                                  |
+| -------------------- | ---------- | ------------------------------------------------- |
+| order-service        | Java       | Order creation, saga flow, emits OrderCreated     |
+| inventory-service    | Go         | Inventory reservation, emits InventoryReserved    |
+| payment-service      | Python     | Payment simulation, emits PaymentSucceeded/Failed |
+| notification-service | TypeScript | Notification/logging, consumes saga completion    |
 
 See [docs/architecture/saga-choreography.md](docs/architecture/saga-choreography.md) for full flow and compensation logic.
 

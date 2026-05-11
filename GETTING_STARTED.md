@@ -53,6 +53,7 @@ make bootstrap
 ```
 
 This command:
+
 1. Creates a k3d cluster named `saga-platform`
 2. Installs ArgoCD
 3. Deploys Redpanda (Kafka)
@@ -63,6 +64,7 @@ This command:
 **Expected time**: 5-10 minutes
 
 Check status:
+
 ```bash
 make status
 ```
@@ -78,6 +80,7 @@ Build Docker images for all services:
 ```
 
 This will:
+
 - Build order-service (Java/Maven)
 - Build inventory-service (Go)
 - Build payment-service (Python)
@@ -95,6 +98,7 @@ make deploy
 ```
 
 Wait for services to be healthy:
+
 ```bash
 kubectl wait --for=condition=Ready pods -l app.kubernetes.io/part-of=saga-platform -n services --timeout=300s
 ```
@@ -126,6 +130,7 @@ kubectl port-forward svc/order-service -n services 8080:8080 &
 ### Services
 
 **Order Service API**:
+
 ```bash
 kubectl port-forward svc/order-service -n services 8080:8080
 # Access at http://localhost:8080
@@ -134,6 +139,7 @@ kubectl port-forward svc/order-service -n services 8080:8080
 ### Observability
 
 **ArgoCD**:
+
 ```bash
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 
@@ -145,6 +151,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.pas
 ```
 
 **Grafana**:
+
 ```bash
 kubectl port-forward svc/prometheus-grafana -n observability 3000:80
 
@@ -154,6 +161,7 @@ kubectl port-forward svc/prometheus-grafana -n observability 3000:80
 ```
 
 **Jaeger (Distributed Tracing)**:
+
 ```bash
 kubectl port-forward svc/jaeger-query -n observability 16686:16686
 
@@ -161,6 +169,7 @@ kubectl port-forward svc/jaeger-query -n observability 16686:16686
 ```
 
 **Prometheus**:
+
 ```bash
 kubectl port-forward svc/prometheus-kube-prometheus-prometheus -n observability 9090:9090
 
@@ -170,6 +179,7 @@ kubectl port-forward svc/prometheus-kube-prometheus-prometheus -n observability 
 ### Infrastructure
 
 **PostgreSQL**:
+
 ```bash
 kubectl port-forward svc/postgresql -n infra 5432:5432
 
@@ -179,6 +189,7 @@ psql -h localhost -U saga -d order_db
 ```
 
 **Redis**:
+
 ```bash
 kubectl port-forward svc/redis-master -n infra 6379:6379
 
@@ -187,6 +198,7 @@ redis-cli -h localhost -a redis-password
 ```
 
 **Redpanda Console** (Kafka UI):
+
 ```bash
 kubectl port-forward svc/redpanda-0 -n infra 8080:8080
 
@@ -287,16 +299,19 @@ kubectl exec -it redpanda-0 -n infra -- rpk topic consume payment-events
 ### In Database
 
 Check order status:
+
 ```bash
 kubectl exec -it postgresql-0 -n infra -- psql -U saga -d order_db -c "SELECT id, customer_id, status, total_amount FROM orders ORDER BY created_at DESC LIMIT 10;"
 ```
 
 Check inventory reservations:
+
 ```bash
 kubectl exec -it postgresql-0 -n infra -- psql -U saga -d inventory_db -c "SELECT * FROM reservations ORDER BY created_at DESC LIMIT 10;"
 ```
 
 Check payments:
+
 ```bash
 kubectl exec -it postgresql-0 -n infra -- psql -U saga -d payment_db -c "SELECT * FROM payments ORDER BY created_at DESC LIMIT 10;"
 ```
@@ -348,6 +363,7 @@ done
 ```
 
 Check which orders failed:
+
 ```bash
 curl http://localhost:8080/api/orders | jq '.[] | select(.status == "FAILED")'
 ```
@@ -466,11 +482,12 @@ This platform demonstrates:
 ✅ **Compensation** - Automatic rollback on failures  
 ✅ **Polyglot** - Java, Go, Python, TypeScript  
 ✅ **GitOps** - Infrastructure as Code  
-✅ **Observability** - Complete tracing and monitoring  
+✅ **Observability** - Complete tracing and monitoring
 
 ## Support
 
 For issues or questions:
+
 - Check [STATUS.md](STATUS.md) for implementation status
 - Review [docs/architecture/saga-choreography.md](docs/architecture/saga-choreography.md) for patterns
 - See [docs/runbooks/operational-runbook.md](docs/runbooks/operational-runbook.md) for operations

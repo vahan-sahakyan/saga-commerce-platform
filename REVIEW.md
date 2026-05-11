@@ -16,12 +16,14 @@
 ## ✅ Infrastructure Components
 
 ### Kubernetes
+
 - ✅ k3d cluster configuration
 - ✅ 1 server + 2 agent nodes
 - ✅ Local registry (localhost:5000)
 - ✅ Port mappings for services
 
 ### Terraform (6 files)
+
 - ✅ providers.tf - Kubernetes & Helm providers
 - ✅ variables.tf - Configuration variables
 - ✅ namespaces.tf - Namespace creation
@@ -30,13 +32,16 @@
 - ✅ outputs.tf - Access information
 
 ### ArgoCD Applications (4 files)
+
 - ✅ order-service.yaml
 - ✅ inventory-service.yaml
 - ✅ payment-service.yaml
 - ✅ notification-service.yaml
 
 ### Helm Charts (4 charts)
+
 Each with: Deployment, Service, ConfigMap, HPA templates
+
 - ✅ order-service chart
 - ✅ inventory-service chart
 - ✅ payment-service chart
@@ -47,11 +52,13 @@ Each with: Deployment, Service, ConfigMap, HPA templates
 ## ✅ Microservices
 
 ### 1. Order Service (Java/Spring Boot)
+
 **Language:** Java 17  
 **Framework:** Spring Boot 3.2.0  
-**Database:** PostgreSQL (order_db)  
+**Database:** PostgreSQL (order_db)
 
 **Files:** 13 Java files
+
 - ✅ OrderServiceApplication.java
 - ✅ OrderController.java
 - ✅ OrderService.java (business logic)
@@ -62,22 +69,26 @@ Each with: Deployment, Service, ConfigMap, HPA templates
 - ✅ DTOs (CreateOrderRequest, CreateOrderItemRequest)
 
 **Configuration:**
+
 - ✅ application.yaml (Kafka, DB, OpenTelemetry)
 - ✅ pom.xml (Maven dependencies)
 - ✅ Dockerfile (multi-stage build)
 
 **Patterns:**
+
 - ✅ Transactional Outbox
 - ✅ Idempotency (processed_events table)
 - ✅ Event publishing (OrderCreated)
 - ✅ Event consumption (InventoryReserved/Failed, PaymentSucceeded/Failed)
 
 ### 2. Inventory Service (Go)
+
 **Language:** Go 1.21  
 **Framework:** Gin  
-**Database:** PostgreSQL (inventory_db) + Redis  
+**Database:** PostgreSQL (inventory_db) + Redis
 
 **Files:** 11 Go files
+
 - ✅ cmd/server/main.go (entry point)
 - ✅ internal/models/models.go (4 models)
 - ✅ internal/service/inventory_service.go
@@ -89,23 +100,27 @@ Each with: Deployment, Service, ConfigMap, HPA templates
 - ✅ internal/config/config.go
 
 **Configuration:**
+
 - ✅ go.mod (dependencies)
 - ✅ Dockerfile (multi-stage build)
 
 **Patterns:**
+
 - ✅ Transactional Outbox
 - ✅ Idempotency
 - ✅ Compensation logic (releases inventory on PaymentFailed)
 - ✅ Redis caching and locking
 
 ### 3. Payment Service (Python/FastAPI)
+
 **Language:** Python 3.11  
 **Framework:** FastAPI  
-**Database:** PostgreSQL (payment_db) + Redis  
+**Database:** PostgreSQL (payment_db) + Redis
 
 **Files:** 10 Python files
+
 - ✅ app/main.py (FastAPI application)
-- ✅ app/models/__init__.py (3 models)
+- ✅ app/models/**init**.py (3 models)
 - ✅ app/services/payment_service.py
 - ✅ app/events/consumer.py
 - ✅ app/events/publisher.py
@@ -113,32 +128,38 @@ Each with: Deployment, Service, ConfigMap, HPA templates
 - ✅ app/config.py
 
 **Configuration:**
+
 - ✅ requirements.txt
 - ✅ Dockerfile (multi-stage build)
 
 **Patterns:**
+
 - ✅ Transactional Outbox
 - ✅ Idempotency (Redis)
 - ✅ 80% success rate for testing
 - ✅ Background tasks (thread-based consumer)
 
 ### 4. Notification Service (TypeScript/Fastify)
+
 **Language:** TypeScript  
 **Framework:** Fastify  
-**Database:** None (stateless)  
+**Database:** None (stateless)
 
 **Files:** 5 TypeScript files
+
 - ✅ src/index.ts (Fastify server)
 - ✅ src/events/consumer.ts
 - ✅ src/events/types.ts
 - ✅ src/config.ts
 
 **Configuration:**
+
 - ✅ package.json
 - ✅ tsconfig.json
 - ✅ Dockerfile (multi-stage build)
 
 **Patterns:**
+
 - ✅ Idempotency (in-memory Set)
 - ✅ Terminal service (no event production)
 - ✅ Consumes: OrderCompleted, OrderFailed, PaymentSucceeded, ShippingInitiated
@@ -188,13 +209,14 @@ Each with: Deployment, Service, ConfigMap, HPA templates
 ✅ **Compensation Logic** - Inventory release on payment failure  
 ✅ **Database per Service** - Complete isolation  
 ✅ **Event-Driven Communication** - All inter-service communication  
-✅ **Correlation IDs** - sagaId tracked through entire flow  
+✅ **Correlation IDs** - sagaId tracked through entire flow
 
 ---
 
 ## 📋 Known Items (Non-Blocking)
 
 ### Compile Warnings
+
 - ❌ Go: Missing dependencies (resolved by `go mod download` during build)
 - ⚠️ Java: Minor warnings (unused imports, Spring Boot version notice)
 - ⚠️ TypeScript: Deprecation warning (moduleResolution)
@@ -202,6 +224,7 @@ Each with: Deployment, Service, ConfigMap, HPA templates
 **Impact:** None - all resolved during build process
 
 ### Observability
+
 - ✅ Infrastructure deployed (Prometheus, Grafana, Jaeger)
 - ⚠️ Service instrumentation: Partial (configuration present, may need tuning)
 
@@ -210,11 +233,13 @@ Each with: Deployment, Service, ConfigMap, HPA templates
 ## 🚀 Installation Readiness Checklist
 
 ### Prerequisites
+
 - [ ] Docker Desktop installed and running
 - [ ] Homebrew installed (macOS)
 - [ ] Terminal access
 
 ### Required Tools (installed via script)
+
 - [ ] k3d
 - [ ] kubectl
 - [ ] helm
@@ -222,6 +247,7 @@ Each with: Deployment, Service, ConfigMap, HPA templates
 - [ ] jq
 
 ### Build Tools (optional but recommended)
+
 - [ ] Java 17
 - [ ] Maven
 - [ ] Go 1.21
@@ -233,6 +259,7 @@ Each with: Deployment, Service, ConfigMap, HPA templates
 ## 🎬 Recommended Installation Path
 
 ### Option 1: Automated (Recommended)
+
 ```bash
 # 1. Check what's missing
 ./scripts/preflight-check.sh
@@ -245,6 +272,7 @@ Each with: Deployment, Service, ConfigMap, HPA templates
 ```
 
 ### Option 2: Manual
+
 ```bash
 # 1. Check dependencies
 ./scripts/preflight-check.sh
@@ -272,28 +300,30 @@ make deploy
 
 ## ⏱️ Time Estimates
 
-| Phase | Time (First Run) | Time (Subsequent) |
-|-------|------------------|-------------------|
-| Dependency Check | 30 seconds | 30 seconds |
-| Dependency Install | 5-10 minutes | - |
-| Bootstrap Infra | 5-10 minutes | 2-3 minutes |
-| Build Services | 5-10 minutes | 2-3 minutes |
-| Deploy Services | 2-3 minutes | 1-2 minutes |
-| Seed Data | 10 seconds | 10 seconds |
-| Test Saga | 30 seconds | 30 seconds |
-| **Total First Run** | **20-30 minutes** | **5-10 minutes** |
+| Phase               | Time (First Run)  | Time (Subsequent) |
+| ------------------- | ----------------- | ----------------- |
+| Dependency Check    | 30 seconds        | 30 seconds        |
+| Dependency Install  | 5-10 minutes      | -                 |
+| Bootstrap Infra     | 5-10 minutes      | 2-3 minutes       |
+| Build Services      | 5-10 minutes      | 2-3 minutes       |
+| Deploy Services     | 2-3 minutes       | 1-2 minutes       |
+| Seed Data           | 10 seconds        | 10 seconds        |
+| Test Saga           | 30 seconds        | 30 seconds        |
+| **Total First Run** | **20-30 minutes** | **5-10 minutes**  |
 
 ---
 
 ## 📊 What You'll Get
 
 ### Running Services
+
 - Order Service (Java) on port 8080
 - Inventory Service (Go) - internal
 - Payment Service (Python) - internal
 - Notification Service (TypeScript) - internal
 
 ### Infrastructure
+
 - ArgoCD (GitOps dashboard)
 - Grafana (Metrics & dashboards)
 - Jaeger (Distributed tracing)
@@ -303,6 +333,7 @@ make deploy
 - Redis (Caching)
 
 ### Capabilities
+
 - Create orders via REST API
 - Watch saga flow through logs
 - View metrics in Grafana
@@ -315,6 +346,7 @@ make deploy
 ## 🔧 Support Resources
 
 If you encounter issues:
+
 1. Check [GETTING_STARTED.md](GETTING_STARTED.md) - Comprehensive troubleshooting
 2. View logs: `kubectl logs -l app=<service-name> -n services`
 3. Check pod status: `kubectl get pods -A`
