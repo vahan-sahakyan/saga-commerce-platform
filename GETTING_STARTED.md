@@ -28,8 +28,9 @@ terraform version
 ### Development Tools (for building services)
 
 ```bash
-# Java (for order-service)
-brew install openjdk@17
+# Java (for order-service) - MUST be Java 21
+brew install --cask temurin-jdk
+# Verify: java -version (should show 21.x)
 
 # Go (for inventory-service)
 brew install go
@@ -71,7 +72,31 @@ make status
 
 All pods should be in `Running` or `Completed` state.
 
-### Step 2: Build Services
+### Step 2: Initialize Databases and Kafka Topics
+
+**⚠️ CRITICAL: This step must be done before building services**
+
+Without this step, services will crash because required databases and topics don't exist.
+
+```bash
+make init-data
+```
+
+This initializes:
+- PostgreSQL databases: `order_db`, `inventory_db`, `payment_db`
+- Kafka topics: `order-events`, `inventory-events`, `payment-events`, `notification-events`, `shipping-events`
+
+Verify initialization:
+
+```bash
+# Check databases
+kubectl exec -it postgresql-0 -n infra -- psql -U saga -c "\\l" | grep -E "order_db|inventory_db|payment_db"
+
+# Check Kafka topics
+kubectl exec -it redpanda-0 -n infra -- rpk topic list | grep -E "order-events|inventory-events|payment-events"
+```
+
+### Step 3: Build Services
 
 Build Docker images for all services:
 

@@ -12,10 +12,11 @@ This will guide you through:
 
 1. ✅ Checking dependencies
 2. ✅ Bootstrapping infrastructure
-3. ✅ Building services
-4. ✅ Deploying to Kubernetes
-5. ✅ Seeding test data
-6. ✅ Testing the saga flow
+3. ✅ Initializing databases and Kafka topics
+4. ✅ Building services
+5. ✅ Deploying to Kubernetes
+6. ✅ Seeding test data
+7. ✅ Testing the saga flow
 
 ---
 
@@ -48,7 +49,7 @@ brew install openjdk@17 go python@3.11 node maven
 make bootstrap
 ```
 
-This creates the k3d cluster and deploys all infrastructure.
+This creates the k3d cluster and deploys all infrastructure components (Redpanda, PostgreSQL, Redis, Prometheus, Grafana, Jaeger).
 
 **Check status:**
 
@@ -58,7 +59,21 @@ make status
 kubectl get pods -A
 ```
 
-### 3. Build Services (5-10 min first time)
+### 3. Initialize Databases and Kafka Topics (1 min)
+
+**⚠️ CRITICAL: This step must be done before building services**
+
+```bash
+make init-data
+```
+
+This initializes:
+- PostgreSQL databases: `order_db`, `inventory_db`, `payment_db`
+- Kafka topics: `order-events`, `inventory-events`, `payment-events`, `notification-events`, `shipping-events`
+
+Services will crash if this step is skipped!
+
+### 4. Build Services (5-10 min first time)
 
 ```bash
 ./scripts/build-all.sh
@@ -89,11 +104,13 @@ docker build -t localhost:5000/notification-service:latest .
 docker push localhost:5000/notification-service:latest
 ```
 
-### 4. Deploy Services
+### 5. Deploy Services
 
 ```bash
 make deploy
 ```
+
+Services will now start successfully because init containers will wait for databases and Kafka to be ready.
 
 Wait for services to be ready:
 
@@ -101,13 +118,13 @@ Wait for services to be ready:
 kubectl wait --for=condition=Ready pods -n services --all --timeout=300s
 ```
 
-### 5. Seed Test Data
+### 6. Seed Test Data
 
 ```bash
 ./scripts/seed-data.sh
 ```
 
-### 6. Test the Platform
+### 7. Test the Platform
 
 **Port forward the order service:**
 

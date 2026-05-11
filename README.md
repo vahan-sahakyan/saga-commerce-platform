@@ -52,6 +52,8 @@ This platform demonstrates:
 
 ### Automated Setup (Recommended)
 
+Run the interactive setup script:
+
 ```bash
 ./scripts/run-platform.sh
 ```
@@ -62,11 +64,13 @@ This interactive script will guide you through the complete setup process.
 
 See [QUICKSTART.md](QUICKSTART.md) for detailed commands.
 
+⚠️ **CRITICAL**: After `make bootstrap`, you MUST run `make init-data` before building services. This initializes databases and Kafka topics. See [docs/BOOTSTRAP_DETAILS.md](docs/BOOTSTRAP_DETAILS.md) for complete bootstrap process details.
+
 **Prerequisites:**
 
 - Docker Desktop (running)
 - k3d, kubectl, helm, terraform, jq
-- Build tools: Java 17, Go 1.21, Python 3.11, Node.js
+- Build tools: **Java 21** (required), Go 1.21, Python 3.11, Node.js
 - **ArgoCD CLI** (for managing GitOps):
   ```bash
   brew install argocd
@@ -87,16 +91,19 @@ See [QUICKSTART.md](QUICKSTART.md) for detailed commands.
 # 2. Bootstrap infrastructure (5-10 min)
 make bootstrap
 
-# 3. Build services (5-10 min first time)
+# 3. Initialize databases and Kafka topics (1 min) ⚠️ CRITICAL
+make init-data
+
+# 4. Build services (5-10 min first time)
 ./scripts/build-all.sh
 
-# 4. Deploy services
+# 5. Deploy services
 make deploy
 
-# 5. Seed test data
+# 6. Seed test data
 make seed
 
-# 6. Start port-forwards (observability + order API)
+# 7. Start port-forwards (observability + order API)
 make pf-all
 ```
 

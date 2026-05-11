@@ -38,22 +38,41 @@
 
 ### Initial Setup
 
+**For complete step-by-step bootstrap instructions, see [BOOTSTRAP_DETAILS.md](../BOOTSTRAP_DETAILS.md)**
+
+Quick reference:
+
 ```bash
-# 1. Create k3d cluster
-make create-cluster
+# 1. Bootstrap infrastructure (creates cluster, PostgreSQL, Redpanda, etc.)
+make bootstrap
 
-# 2. Install infrastructure
-make install-infra
+# 2. Initialize databases and Kafka topics (CRITICAL - do not skip!)
+make init-data
 
-# 3. Wait for infrastructure to be ready
-kubectl wait --for=condition=Ready pods --all -n infra --timeout=300s
-kubectl wait --for=condition=Ready pods --all -n observability --timeout=300s
-
-# 4. Build and push service images
+# 3. Build service images
 ./scripts/build-all.sh
 
-# 5. Deploy services
+# 4. Deploy services (init containers manage dependency ordering)
 make deploy
+
+# 5. Wait for services to be ready
+kubectl wait --for=condition=Ready pods -n services --all --timeout=300s
+```
+
+### Understanding Init Containers
+
+Each service deployment includes init containers that wait for dependencies before starting the main application:
+
+- `wait-for-postgres`: Polls PostgreSQL readiness
+- `wait-for-kafka`: Polls Kafka broker readiness
+
+These ensure services don't crash due to missing databases or topics.
+
+**Check if init containers ran successfully:**
+
+```bash
+kubectl describe pod <pod-name> -n services | grep -A 5 "Init Containers"
+# Should show: Initialized: True
 ```
 
 ### Update a Service
