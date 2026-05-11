@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # database
+    port: str = os.getenv("PORT", "8080")
     postgres_host: str = os.getenv("POSTGRES_HOST", "localhost")
     postgres_port: str = os.getenv("POSTGRES_PORT", "5432")
     postgres_db: str = os.getenv("POSTGRES_DB", "payment_db")

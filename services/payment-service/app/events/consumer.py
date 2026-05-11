@@ -15,6 +15,7 @@ class EventConsumer:
     def __init__(self):
         self.consumer = KafkaConsumer(
             'inventory-events',
+            'order-events',
             bootstrap_servers=settings.kafka_bootstrap_servers.split(','),
             group_id='payment-service-group',
             auto_offset_reset='earliest',
@@ -54,6 +55,7 @@ class EventConsumer:
         """Handle a single event"""
         event_id = event.get('eventId')
         event_type = event.get('eventType')
+        saga_id = event.get('sagaId')
         
         logger.info(f"received event: {event_id} type: {event_type}")
         
@@ -68,25 +70,26 @@ class EventConsumer:
             # handle event
             if event_type == "InventoryReserved":
                 self._handle_inventory_reserved(event, db)
+            elif event_type == "OrderCreated":
+                # just persist for later lookup
+                logger.info(f"persisting OrderCreated event for sagaId {saga_id}")
             else:
                 logger.warning(f"unknown event type: {event_type}")
                 return
-            
-            # mark as processed
+            # mark as processed (persist all events for idempotency and lookup)
             processed = ProcessedEvent(
                 event_id=event_id,
-                event_type=event_type
+                event_type=event_type,
+                saga_id=saga_id,
+                payload=json.dumps(event.get('payload', {}))
             )
             db.add(processed)
             db.commit()
-            
             logger.info(f"processed event: {event_id}")
-        
         except Exception as e:
             logger.error(f"error handling event {event_id}: {e}", exc_info=True)
             db.rollback()
             raise
-        
         finally:
             db.close()
     
@@ -94,15 +97,19 @@ class EventConsumer:
         """Handle InventoryReserved event"""
         payload = event.get('payload', {})
         order_id = payload.get('orderId')
-        
+        items = payload.get('items', [])
         if not order_id:
             logger.error("missing orderId in InventoryReserved event")
             return
-        
-        # extract amount from event context or use default
-        # in real implementation, this would come from the event or order lookup
-        amount = 100.0  # placeholder - would normally look up order total
-        
+        if not items:
+            logger.error(f"missing items in InventoryReserved event for orderId {order_id}")
+            return
+        # calculate total amount from items (sum of price * quantity)
+        try:
+            amount = sum(item['price'] * item['quantity'] for item in items)
+        except Exception as e:
+            logger.error(f"error calculating total from items for orderId {order_id}: {e}")
+            return
         # process payment
         payment_service = PaymentService(db)
         payment_service.process_payment(order_id, amount)

@@ -16,13 +16,11 @@ RESPONSE=$(curl -s -X POST ${ORDER_SERVICE_URL}/api/orders \
     "items": [
       {
         "productId": "product-1",
-        "quantity": 2,
-        "price": 29.99
+        "quantity": 2
       },
       {
         "productId": "product-2",
-        "quantity": 1,
-        "price": 49.99
+        "quantity": 1
       }
     ]
   }')

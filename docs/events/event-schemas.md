@@ -32,12 +32,13 @@ All events follow this base structure:
     {
       "productId": "string",
       "quantity": number,
-      "price": number
+      "price": number // set by order-service, not client-supplied
     }
   ],
   "totalAmount": number
 }
 ```
+*Note: The price is determined by the order-service at order creation time, not accepted from the client request.*
 
 ### InventoryReserved
 
@@ -53,7 +54,8 @@ All events follow this base structure:
   "items": [
     {
       "productId": "string",
-      "quantity": number
+      "quantity": number,
+      "price": number // set by inventory-service, from inventory DB
     }
   ]
 }

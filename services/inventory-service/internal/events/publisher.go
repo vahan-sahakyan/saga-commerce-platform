@@ -55,7 +55,7 @@ func (p *Publisher) publishEvents() {
 
 	for _, event := range events {
 		// reconstruct payload
-		var payloadMap map[string]interface{}
+		var payloadMap map[string]any
 		if err := json.Unmarshal([]byte(event.Payload), &payloadMap); err != nil {
 			log.Printf("error unmarshaling payload: %v", err)
 			continue

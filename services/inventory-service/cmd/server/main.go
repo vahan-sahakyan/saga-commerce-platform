@@ -61,12 +61,12 @@ func main() {
 
 	// start server
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + cfg.Port,
 		Handler: router,
 	}
 
 	go func() {
-		log.Println("starting inventory service on :8080")
+		log.Println("starting inventory service on :" + cfg.Port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("failed to start server: %v", err)
 		}

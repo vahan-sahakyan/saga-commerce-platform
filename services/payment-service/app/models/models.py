@@ -36,4 +36,6 @@ class ProcessedEvent(Base):
     
     event_id = Column(String, primary_key=True)
     event_type = Column(String, nullable=False)
+    saga_id = Column(String, nullable=True, index=True)
+    payload = Column(Text, nullable=True)
     processed_at = Column(DateTime(timezone=True), server_default=func.now())

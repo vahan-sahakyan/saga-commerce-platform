@@ -36,21 +36,29 @@ public class OrderService {
     @Transactional
     public OrderResponse createOrder(CreateOrderRequest request) {
         log.info("creating order for customer: {}", request.getCustomerId());
-        
-        // calculate total
-        BigDecimal total = request.getItems().stream()
+
+        // static product price map (in real app, fetch from product service)
+        java.util.Map<String, BigDecimal> productPrices = java.util.Map.of(
+            "product-1", new BigDecimal("29.99"),
+            "product-2", new BigDecimal("49.99")
+        );
+
+        // convert items and calculate total
+        List<OrderItem> orderItems = request.getItems().stream()
+            .map(dto -> {
+                BigDecimal price = productPrices.getOrDefault(dto.getProductId(), BigDecimal.ZERO);
+                return OrderItem.builder()
+                    .productId(dto.getProductId())
+                    .quantity(dto.getQuantity())
+                    .price(price)
+                    .build();
+            })
+            .collect(Collectors.toList());
+
+        BigDecimal total = orderItems.stream()
             .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        // convert items
-        List<OrderItem> orderItems = request.getItems().stream()
-            .map(dto -> OrderItem.builder()
-                .productId(dto.getProductId())
-                .quantity(dto.getQuantity())
-                .price(dto.getPrice())
-                .build())
-            .collect(Collectors.toList());
-        
+
         // create order
         Order order = Order.builder()
             .customerId(request.getCustomerId())
@@ -160,7 +168,6 @@ public class OrderService {
                 .map(item -> OrderItemDto.builder()
                     .productId(item.getProductId())
                     .quantity(item.getQuantity())
-                    .price(item.getPrice())
                     .build())
                 .collect(Collectors.toList()))
             .createdAt(order.getCreatedAt())

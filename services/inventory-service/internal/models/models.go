@@ -12,6 +12,7 @@ type Inventory struct {
 	ProductID string    `gorm:"not null;uniqueIndex" json:"productId"`
 	Quantity  int       `gorm:"not null" json:"quantity"`
 	Reserved  int       `gorm:"not null;default:0" json:"reserved"`
+	Price     float64   `gorm:"not null" json:"price"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }

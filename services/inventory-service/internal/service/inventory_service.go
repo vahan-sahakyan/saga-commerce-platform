@@ -49,8 +49,9 @@ func (s *InventoryService) HandleOrderCreated(orderID string, items []OrderItem)
 		}
 	}
 
-	// reserve inventory
+	// reserve inventory and collect reserved items with price
 	reservationID := uuid.New().String()
+	reservedItems := make([]map[string]any, 0, len(items))
 	for _, item := range items {
 		inventory, _ := s.inventoryRepo.FindByProductID(item.ProductID)
 		inventory.Reserved += item.Quantity
@@ -68,10 +69,16 @@ func (s *InventoryService) HandleOrderCreated(orderID string, items []OrderItem)
 		if err := s.inventoryRepo.CreateReservation(reservation); err != nil {
 			return err
 		}
+
+		reservedItems = append(reservedItems, map[string]any{
+			"productId": item.ProductID,
+			"quantity":  item.Quantity,
+			"price":     inventory.Price,
+		})
 	}
 
 	log.Printf("inventory reserved for order: %s", orderID)
-	return s.publishInventoryReserved(orderID, reservationID)
+	return s.publishInventoryReservedWithItems(orderID, reservationID, reservedItems)
 }
 
 func (s *InventoryService) HandlePaymentFailed(orderID string) error {
@@ -106,17 +113,18 @@ func (s *InventoryService) HandlePaymentFailed(orderID string) error {
 	return s.publishInventoryReleased(orderID)
 }
 
-func (s *InventoryService) publishInventoryReserved(orderID, reservationID string) error {
-	payload := map[string]interface{}{
+// publishInventoryReservedWithItems emits InventoryReserved event with items including price
+func (s *InventoryService) publishInventoryReservedWithItems(orderID, reservationID string, items []map[string]any) error {
+	payload := map[string]any{
 		"orderId":       orderID,
 		"reservationId": reservationID,
+		"items":         items,
 	}
-
 	return s.publishEvent(orderID, "InventoryReserved", payload)
 }
 
 func (s *InventoryService) publishInventoryFailed(orderID, reason string) error {
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"orderId": orderID,
 		"reason":  reason,
 	}
@@ -125,14 +133,14 @@ func (s *InventoryService) publishInventoryFailed(orderID, reason string) error 
 }
 
 func (s *InventoryService) publishInventoryReleased(orderID string) error {
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"orderId": orderID,
 	}
 
 	return s.publishEvent(orderID, "InventoryReleased", payload)
 }
 
-func (s *InventoryService) publishEvent(sagaID, eventType string, payload interface{}) error {
+func (s *InventoryService) publishEvent(sagaID, eventType string, payload any) error {
 	payloadJSON, err := json.Marshal(payload)
 	if err != nil {
 		return err

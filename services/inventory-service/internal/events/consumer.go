@@ -14,12 +14,12 @@ import (
 )
 
 type BaseEvent struct {
-	EventID   string                 `json:"eventId"`
-	SagaID    string                 `json:"sagaId"`
-	EventType string                 `json:"eventType"`
-	Producer  string                 `json:"producer"`
-	Timestamp json.RawMessage        `json:"timestamp"`
-	Payload   map[string]interface{} `json:"payload"`
+	EventID   string          `json:"eventId"`
+	SagaID    string          `json:"sagaId"`
+	EventType string          `json:"eventType"`
+	Producer  string          `json:"producer"`
+	Timestamp json.RawMessage `json:"timestamp"`
+	Payload   map[string]any  `json:"payload"`
 }
 
 type Consumer struct {
@@ -111,11 +111,11 @@ func (c *Consumer) handleEvent(event *BaseEvent) error {
 func (c *Consumer) handleOrderCreated(event *BaseEvent) error {
 	orderID := event.Payload["orderId"].(string)
 
-	itemsData := event.Payload["items"].([]interface{})
+	itemsData := event.Payload["items"].([]any)
 	items := make([]service.OrderItem, 0)
 
 	for _, itemData := range itemsData {
-		itemMap := itemData.(map[string]interface{})
+		itemMap := itemData.(map[string]any)
 		items = append(items, service.OrderItem{
 			ProductID: itemMap["productId"].(string),
 			Quantity:  int(itemMap["quantity"].(float64)),

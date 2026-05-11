@@ -3,6 +3,7 @@ package config
 import "os"
 
 type Config struct {
+	Port             string
 	PostgresHost     string
 	PostgresPort     string
 	PostgresDB       string
@@ -17,6 +18,7 @@ type Config struct {
 
 func Load() *Config {
 	return &Config{
+		Port:             getEnv("PORT", "8080"),
 		PostgresHost:     getEnv("POSTGRES_HOST", "localhost"),
 		PostgresPort:     getEnv("POSTGRES_PORT", "5432"),
 		PostgresDB:       getEnv("POSTGRES_DB", "inventory_db"),
