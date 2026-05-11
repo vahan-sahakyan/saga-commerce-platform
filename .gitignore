@@ -29,3 +29,4 @@ infra/terraform/.terraform.lock.hcl
 # Environment
 .env
 .env.local
+.venv
