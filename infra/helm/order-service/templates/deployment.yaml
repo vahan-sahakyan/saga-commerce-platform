@@ -17,6 +17,36 @@ spec:
       annotations:
         rollme: "{{ now | unixEpoch }}"
     spec:
+      initContainers:
+      # Wait for PostgreSQL to be ready
+      - name: wait-for-postgres
+        image: postgres:16-alpine
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for PostgreSQL to be ready..."
+          until pg_isready -h postgresql.infra.svc.cluster.local -p 5432; do
+            echo "PostgreSQL is unavailable - sleeping"
+            sleep 2
+          done
+          echo "PostgreSQL is ready!"
+      
+      # Wait for Kafka to be ready
+      - name: wait-for-kafka
+        image: redpandadata/redpanda:v23.3.6
+        command:
+        - bash
+        - -c
+        - |
+          echo "Waiting for Kafka to be ready..."
+          KAFKA_BROKER="redpanda.infra.svc.cluster.local:9093"
+          until rpk cluster info -X brokers="$KAFKA_BROKER" &>/dev/null; do
+            echo "Kafka is unavailable - sleeping"
+            sleep 2
+          done
+          echo "Kafka is ready!"
+      
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

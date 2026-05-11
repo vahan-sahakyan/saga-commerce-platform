@@ -1,4 +1,4 @@
-.PHONY: help bootstrap deploy destroy clean status test \
+.PHONY: help bootstrap init-data deploy destroy clean status test \
         build-order build-inventory build-payment build-notification build-all \
         dev-order dev-inventory dev-payment dev-notification dev-all \
         restart-order restart-inventory restart-payment restart-notification \
@@ -19,6 +19,10 @@ bootstrap: ## bootstrap the entire platform (cluster + infrastructure)
 	@$(MAKE) create-cluster
 	@$(MAKE) install-infra
 	@echo "✅ Bootstrap complete!"
+
+init-data: ## initialize databases and kafka topics
+	@echo "🔧 Initializing data infrastructure..."
+	@./scripts/init-data.sh
 
 create-cluster: ## create k3d cluster
 	@echo "📦 Creating k3d cluster..."
