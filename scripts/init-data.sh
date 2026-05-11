@@ -71,6 +71,9 @@ echo -e "${GREEN}✓ inventory-events${NC}"
 kubectl exec redpanda-0 -n infra -- rpk topic create payment-events -p 1 -r 1 2>&1 | grep -i "ok\|already" || true
 echo -e "${GREEN}✓ payment-events${NC}"
 
+kubectl exec redpanda-0 -n infra -- rpk topic create shipping-events -p 1 -r 1 2>&1 | grep -i "ok\|already" || true
+echo -e "${GREEN}✓ shipping-events${NC}"
+
 kubectl exec redpanda-0 -n infra -- rpk topic create notification-events -p 1 -r 1 2>&1 | grep -i "ok\|already" || true
 echo -e "${GREEN}✓ notification-events${NC}"
 
