@@ -94,7 +94,9 @@ resource "kubernetes_job" "init_kafka_topics" {
               echo "Creating Kafka topics..."
               rpk topic create order-events --brokers "$$REDPANDA_BROKER" -p 1 -r 1 || echo "order-events may already exist"
               rpk topic create inventory-events --brokers "$$REDPANDA_BROKER" -p 1 -r 1 || echo "inventory-events may already exist"
+
               rpk topic create payment-events --brokers "$$REDPANDA_BROKER" -p 1 -r 1 || echo "payment-events may already exist"
+              rpk topic create shipping-events --brokers "$$REDPANDA_BROKER" -p 1 -r 1 || echo "shipping-events may already exist"
               rpk topic create notification-events --brokers "$$REDPANDA_BROKER" -p 1 -r 1 || echo "notification-events may already exist"
 
               echo "Kafka topics initialized successfully!"
